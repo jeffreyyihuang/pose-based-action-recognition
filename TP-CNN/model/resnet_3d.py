@@ -109,7 +109,7 @@ class Bottleneck(nn.Module):
 
 class ResNet(nn.Module):
 
-    def __init__(self, block, layers, num_classes, shortcut_type='B'):
+    def __init__(self, block, layers, nb_classes, shortcut_type='B'):
         self.inplanes = 64
         super(ResNet, self).__init__()
         self.conv1 = nn.Conv3d(1, 64, kernel_size=7, stride=(1, 2, 2), # change from 3channel to 1channel
@@ -122,7 +122,7 @@ class ResNet(nn.Module):
         self.layer3 = self._make_layer(block, 256, layers[2], shortcut_type, stride=2)
         self.layer4 = self._make_layer(block, 512, layers[3], shortcut_type, stride=2)
         self.avgpool = nn.AvgPool3d((1, 4, 4), stride=1)
-        self.fc = nn.Linear(512 * block.expansion, num_classes)
+        self.fc = nn.Linear(512 * block.expansion, nb_classes)
 
         for m in self.modules():
             if isinstance(m, nn.Conv3d):
@@ -172,7 +172,8 @@ class ResNet(nn.Module):
 
         return x
 
-def filter2d_to_3d(key,weight2d, weight3d):
+
+def filter2d_to_3d(key, weight2d, weight3d):
     nb_filter, channel, h, w, c = weight3d.size()
     if key == 'conv1.weight':
         s=0
@@ -199,10 +200,10 @@ def weight_trainsform(pretrain_dict, model_dict):
     return model_dict
  
 
-def resnet18(pretrained=False, num_classes=15, **kwargs):
+def resnet18(pretrained=False, nb_classes=15, **kwargs):
     """Constructs a ResNet-18 model.
     """
-    model = ResNet(BasicBlock, [2, 2, 2, 2], num_classes, **kwargs)
+    model = ResNet(BasicBlock, [2, 2, 2, 2], nb_classes, **kwargs)
 
     pretrain_dict = model_zoo.load_url(model_urls['resnet18'])
     model_dict = model.state_dict()
@@ -213,10 +214,10 @@ def resnet18(pretrained=False, num_classes=15, **kwargs):
 
     return model
 
-def resnet34(pretrained=False, num_classes=15, **kwargs):
+def resnet34(pretrained=False, nb_classes=15, **kwargs):
     """Constructs a ResNet-34 model.
     """
-    model = ResNet(BasicBlock, [3, 4, 6, 3], num_classes, **kwargs)
+    model = ResNet(BasicBlock, [3, 4, 6, 3], nb_classes, **kwargs)
     pretrain_dict = model_zoo.load_url(model_urls['resnet34'])
     model_dict = model.state_dict()
     if pretrained:
@@ -225,10 +226,10 @@ def resnet34(pretrained=False, num_classes=15, **kwargs):
     return model
 
 
-def resnet50(pretrained=False, num_classes=15, **kwargs):
+def resnet50(pretrained=False, nb_classes=15, **kwargs):
     """Constructs a ResNet-50 model.
     """
-    model = ResNet(Bottleneck, [3, 4, 6, 3], num_classes, **kwargs)
+    model = ResNet(Bottleneck, [3, 4, 6, 3], nb_classes, **kwargs)
     pretrain_dict = model_zoo.load_url(model_urls['resnet50'])
     model_dict = model.state_dict()
     if pretrained:
@@ -236,10 +237,10 @@ def resnet50(pretrained=False, num_classes=15, **kwargs):
         model.load_state_dict(weight_dict)
     return model
 
-def resnet101(pretrained=False, num_classes=15, **kwargs):
+def resnet101(pretrained=False, nb_classes=15, **kwargs):
     """Constructs a ResNet-101 model.
     """
-    model = ResNet(Bottleneck, [3, 4, 23, 3], num_classes, **kwargs)
+    model = ResNet(Bottleneck, [3, 4, 23, 3], nb_classes, **kwargs)
     pretrain_dict = model_zoo.load_url(model_urls['resnet101'])
     model_dict = model.state_dict()
     if pretrained:

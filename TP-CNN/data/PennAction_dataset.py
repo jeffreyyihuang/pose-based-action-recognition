@@ -8,6 +8,7 @@ import numpy as np
 import torchvision.transforms as transforms
 from tensorboardX import SummaryWriter
 
+
 class PennActionDataset(Dataset):
     def __init__(self, dic, use_Bbox, split, input_type, nb_per_stack=3):
         self.keys = list(dic.keys())
@@ -36,7 +37,7 @@ class PennActionDataset(Dataset):
             videoname, nb_clips = self.keys[i].split('[@]')
             clip_idx = randint(1, int(nb_clips))            
             item = get_fn(videoname, int(clip_idx))
-            return (item,label)
+            return (videoname, item,label)
 
         elif self.split == 'test':
             videoname, clip_idx = self.keys[i].split('[@]')
@@ -45,10 +46,9 @@ class PennActionDataset(Dataset):
 
         else:
             raise ValueError('There are only train and test split')
-        
-    
+           
     def stack_joint_position(self, key, index):
-        data_dir = '/home/ubuntu/data/PennAction/Penn_Action/heatmap/'
+        data_dir = '/mnt/home/htchen-dev/home/ubuntu/data/PennAction/Penn_Action/heatmap/'
         out=np.zeros((self.nb_per_stack,224,224))
         for ii in range(self.nb_per_stack):
             n = key+'/'+ str(index+ii).zfill(6)+'.mat'
@@ -64,7 +64,7 @@ class PennActionDataset(Dataset):
         return torch.from_numpy(out).float().div(255)
 
     def stack_joint_position_3d(self, key, index):
-        data_dir = '/home/ubuntu/data/PennAction/Penn_Action/heatmap/'
+        data_dir = '/mnt/home/htchen-dev/home/ubuntu/data/PennAction/Penn_Action/heatmap/'
         out=np.zeros((1,self.nb_per_stack,112,112))
         for ii in range(self.nb_per_stack):
             n = key+'/'+ str(index+ii).zfill(6)+'.mat'
@@ -80,7 +80,7 @@ class PennActionDataset(Dataset):
         return torch.from_numpy(out).float().div(255)
     
     def stack_opf(self, key, index):
-        data_dir = '/home/ubuntu/data/PennAction/Penn_Action/flownet2.0/dense_opf/'
+        data_dir = '/mnt/home/htchen-dev/home/ubuntu/data/PennAction/Penn_Action/flownet2.0/dense_opf/'
         out=np.zeros((2*self.nb_per_stack,224,224))
         for ii in range(self.nb_per_stack):
             flowx=Image.open(data_dir + key+'/x'+str(index+ii).zfill(6)+'.jpg')
@@ -96,7 +96,7 @@ class PennActionDataset(Dataset):
         return torch.from_numpy(out).float().div(255)
 
     def read_image(self, key, index):
-        data_dir = '/home/ubuntu/data/PennAction/Penn_Action/frames/'
+        data_dir = '/mnt/home/htchen-dev/home/ubuntu/data/PennAction/Penn_Action/frames/'
         n = key+'/'+ str(index).zfill(6)+'.jpg'
         img = Image.open(data_dir+n)
 

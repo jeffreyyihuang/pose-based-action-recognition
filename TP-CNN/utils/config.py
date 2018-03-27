@@ -21,12 +21,13 @@ class Config:
     nb_per_stack = 15
 
     #model
-    model = 'resnet50'
+    model = 'resnet18'
     nb_classes = 15
+    Fusion = False
 
     #record
     record_path = 'record'
-    dic_path = '/home/ubuntu/data/PennAction/Penn_Action/train_test_split/'
+    dic_path = '/mnt/home/htchen-dev/home/ubuntu/data/PennAction/Penn_Action/train_test_split/'
 
     #utils
     num_workers = 8

@@ -13,7 +13,6 @@ from utils.config import opt
 from data.dataloader import DataLoader as DLoader
 import model.resnet_2d as models_2d
 import model.resnet_3d as models_3d
-import model.resnet3d_conv1_10 as model_dev
 from utils.extension import *
 
 
@@ -59,28 +58,28 @@ class Resnet2D():
             self.model = models_2d.__dict__[self.opt.model](
                 pretrained=True,
                 channel=self.opt.nb_per_stack*2,
-                num_classes=self.opt.nb_classes
+                nb_classes=self.opt.nb_classes
             )
 
         elif opt.input_type == 'rgb':
             self.model = models_2d.__dict__[self.opt.model](
                 pretrained=True,
                 channel=3,
-                num_classes=self.opt.nb_classes
+                nb_classes=self.opt.nb_classes
             )
             self.opt.nb_per_stack = 1
 
         elif opt.input_type == '3d_pose':
             self.model = models_3d.__dict__[self.opt.model](
                 pretrained=True,
-                num_classes=self.opt.nb_classes
+                nb_classes=self.opt.nb_classes
             )
 
         else:
             self.model = models_2d.__dict__[self.opt.model](
                 pretrained=True,
                 channel=self.opt.nb_per_stack,
-                num_classes=self.opt.nb_classes
+                nb_classes=self.opt.nb_classes
             )
 
         # TO cuda()
@@ -176,7 +175,7 @@ class Resnet2D():
         progress = tqdm(self.train_loader, ascii=True, desc=des)
 
         # mini-batch training
-        for i, (data, label) in enumerate(progress):
+        for i, (_, data, label) in enumerate(progress):
             # measure data loading time
             data_time.update(time.time() - end)
 
