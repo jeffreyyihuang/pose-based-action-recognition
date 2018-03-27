@@ -8,7 +8,7 @@ from pprint import pprint
 class Config:
     #hyperparameter
     nb_epochs = 50
-    batch_size = 32
+    batch_size = 2
     lr = 5e-3
     evaluate = False
     resume = False
@@ -16,9 +16,9 @@ class Config:
 
     # data
     dataset = 'PennAction'
-    input_type = 'pose'
+    input_type = '3d_pose'
     use_Bbox = False
-    nb_per_stack = 15
+    nb_per_stack = 10
 
     #model
     model = 'resnet18'

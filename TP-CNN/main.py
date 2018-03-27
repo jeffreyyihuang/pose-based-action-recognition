@@ -13,6 +13,7 @@ from utils.config import opt
 from data.dataloader import DataLoader as DLoader
 import model.resnet_2d as models_2d
 import model.resnet_3d as models_3d
+import model.pose_resnet as pose_net
 from utils.extension import *
 
 
@@ -70,10 +71,7 @@ class Resnet2D():
             self.opt.nb_per_stack = 1
 
         elif opt.input_type == '3d_pose':
-            self.model = models_3d.__dict__[self.opt.model](
-                pretrained=True,
-                nb_classes=self.opt.nb_classes
-            )
+            self.model = pose_net.End2EndPoseStream(VIDEO_W=112,VIDEO_H=112)
 
         else:
             self.model = models_2d.__dict__[self.opt.model](

@@ -3,10 +3,15 @@ from random import randint
 from PIL import Image
 import torch
 import scipy.io
+import os
+import cv2
 from torch.utils.data import Dataset, DataLoader
 import numpy as np
 import torchvision.transforms as transforms
 from tensorboardX import SummaryWriter
+# from data.OpenPose_library import HeatmapPafGenerator
+from data.Openpose.config_reader import config_reader
+import data.Openpose.util as util
 
 
 class PennActionDataset(Dataset):
@@ -62,13 +67,15 @@ class PennActionDataset(Dataset):
             out[ii,:,:] = data.resize([224,224])
     
         return torch.from_numpy(out).float().div(255)
-
+    '''
     def stack_joint_position_3d(self, key, index):
         data_dir = '/mnt/home/htchen-dev/home/ubuntu/data/PennAction/Penn_Action/heatmap/'
-        out=np.zeros((1,self.nb_per_stack,112,112))
+        # out=np.zeros((1,self.nb_per_stack,112,112))
+        out=np.zeros((15,self.nb_per_stack,112,112))
         for ii in range(self.nb_per_stack):
             n = key+'/'+ str(index+ii).zfill(6)+'.mat'
             mat = scipy.io.loadmat(data_dir + n)['final_score']
+            # joint_postion = Image.fromarray(mat.sum(axis=2,dtype='uint8'))
             joint_postion = Image.fromarray(mat.sum(axis=2,dtype='uint8'))
             if self.use_Bbox:
                 data = self.crop_gt_Bbox(joint_postion,key,index+ii)
@@ -78,7 +85,37 @@ class PennActionDataset(Dataset):
             out[:,ii,:,:] = data.resize([112,112])
     
         return torch.from_numpy(out).float().div(255)
-    
+    '''
+    def stack_joint_position_3d(self, key, index):
+        data_dir = '/mnt/home/htchen-dev/home/ubuntu/data/PennAction/Penn_Action/frames/'
+        out=np.zeros((self.nb_per_stack,3,368,368))
+
+        VIDEO_W=112
+        VIDEO_H=112
+        param_, model_ = config_reader()
+        scale = model_['boxsize'] / float(VIDEO_W)
+        h = int(VIDEO_W*scale)
+        w = int(VIDEO_H*scale)
+        pad_h = 0 if (h%model_['stride']==0) else model_['stride'] - (h % model_['stride']) 
+        pad_w = 0 if (w%model_['stride']==0) else model_['stride'] - (w % model_['stride'])
+
+        for ii in range(self.nb_per_stack):
+            n = os.path.join(key, str(index).zfill(6)+'.jpg')
+            img = Image.open(data_dir+n)
+            if self.use_Bbox:
+                img = (self.crop_gt_Bbox(img,key,index)).resize([112,112])
+            else:
+                img = img.resize([112,112])
+
+            imageToTest = cv2.resize(np.array(img), (0,0), fx=scale, fy=scale, interpolation=cv2.INTER_CUBIC)
+            imageToTest_padded, pad = \
+            util.padRightDownCorner(imageToTest, model_['stride'], model_['padValue'])
+            imageToTest_padded = np.transpose(np.float32(imageToTest_padded[:,:,:,np.newaxis]), (3,2,0,1))/256 - 0.5
+            out[ii,:,:,:] = torch.from_numpy(imageToTest_padded)
+      
+        return torch.FloatTensor(out)
+
+
     def stack_opf(self, key, index):
         data_dir = '/mnt/home/htchen-dev/home/ubuntu/data/PennAction/Penn_Action/flownet2.0/dense_opf/'
         out=np.zeros((2*self.nb_per_stack,224,224))
